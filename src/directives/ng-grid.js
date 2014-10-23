@@ -80,7 +80,16 @@
                                 grid.data = $.extend([], a);
                                 grid.rowFactory.fixRowCache();
                                 angular.forEach(grid.data, function (item, j) {
-                                    var indx = grid.rowMap[j] || j;
+									// The indx of the current item according to rowMap.
+									// Notice that in 1st time, rowMap might be empty, in which case the actual index
+									// is taken. This is a fix to the 'indx = x || y' bug, since x can be evaluated
+									// to 0, which is a valid index, but will be considered as false, resulting in y
+									// being evaluated.
+									var indx = grid.rowMap[j];
+                                    if (indx === undefined || indx === null) {
+										indx = j;
+									}
+
                                     if (grid.rowCache[indx]) {
                                         grid.rowCache[indx].ensureEntity(item);
                                     }
