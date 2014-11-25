@@ -9,7 +9,7 @@ function ngGridLayoutPlugin () {
     };
 
     this.updateGridLayout = function () {
-        if (!self.scope.$$phase) {
+		if (!self.scope.$$phase && !self.scope.$root.$$phase) {
             self.scope.$apply(function(){
                 self.domUtilityService.RebuildGrid(self.scope, self.grid);
             });
