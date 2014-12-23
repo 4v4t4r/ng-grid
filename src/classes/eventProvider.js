@@ -257,5 +257,5 @@
     };
     // In this example we want to assign grid events.
     self.assignGridEventHandlers();
-    self.assignEvents();
+//    self.assignEvents();
 };

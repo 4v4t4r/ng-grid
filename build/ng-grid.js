@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 10/23/2014 13:18
+* Compiled At: 12/23/2014 15:23
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -200,6 +200,145 @@ ngGridFilters.filter('ngColumns', function() {
         });
     };
 });
+
+
+'use strict';
+
+angular.module('ngGrid.services').factory('$cleanupService', ['$timeout', function($timeout) {
+	var cleanupService = {};
+	function cleanupObject(obj) {
+		for (var prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				obj[prop] = null;
+			}
+		}
+	}
+
+	
+	function cleanupGrid(grid) {
+		grid.searchProvider && (grid.searchProvider.extFilter = null);
+
+		$(grid.$headerScroller).remove();
+		$(grid.$viewport).remove();
+		for (var row in grid.rowCache) {
+			cleanupRow(grid.rowCache[row]);
+		}
+
+		cleanupObject(grid);
+	}
+
+	
+	function cleanupRow(row) {
+		if (row.clone !== undefined) {
+			row.clone.orig = null;
+			cleanupRow(row.clone);
+		}
+		
+		cleanupObject(row);
+	}
+	function cleanupColumn(col) {
+		cleanupObject(col);
+	}
+	function addBackDollarDestroy(scope) {
+		scope.$destroy = function() {
+			function decrementListenerCount(current, count, name) {
+				do {
+					current.$$listenerCount[name] -= count;
+
+					if (current.$$listenerCount[name] === 0) {
+						delete current.$$listenerCount[name];
+					}
+				} while ((current = current.$parent));
+			}
+			var parent = scope.$parent;
+			scope.$$destroyed = true;
+			angular.forEach(scope.$$listenerCount, angular.bind(null, decrementListenerCount, scope));
+			if (parent.$$childHead == scope) parent.$$childHead = scope.$$nextSibling;
+			if (parent.$$childTail == scope) parent.$$childTail = scope.$$prevSibling;
+			if (scope.$$prevSibling) scope.$$prevSibling.$$nextSibling = scope.$$nextSibling;
+			if (scope.$$nextSibling) scope.$$nextSibling.$$prevSibling = scope.$$prevSibling;
+			scope.$parent = scope.$$nextSibling = scope.$$prevSibling = scope.$$childHead =
+				scope.$$childTail = scope.$root = null;
+			scope.$$listeners = {};
+			scope.$$watchers = scope.$$asyncQueue = scope.$$postDigestQueue = [];
+			scope.$destroy = scope.$digest = scope.$apply = angular.noop;
+			scope.$on = scope.$watch = function() {
+				return angular.noop;
+			};
+		};
+	}
+
+	function decorateDomElement2($scope, $element) {
+		$scope.$on('$destroy', function cleanupElementNgGrid() {
+			$timeout(function() {
+				addBackDollarDestroy($scope);
+				$scope.$destroy();
+				$scope.destroyedByForce = true;
+			}, 500); 
+		});
+	}
+	cleanupService.decorateDirectiveForHeapCleanup = function decorateDirectiveForHeapCleanup($scope, $element, grid) {
+
+		decorateDomElement2($scope,$element);
+		grid.eventProvider.assignEvents = angular.noop;
+
+		$scope.$on('$destroy', function cleanupScopeAndGrid() {
+			$scope.adjustScrollLeft = null;
+			$scope.adjustScrollTop = null;
+			$scope.cantPageBackward = null;
+			$scope.cantPageForward = null;
+			$scope.cantPageToLast = null;
+			$scope.cantPageToLast = null;
+			$scope.cantpageBackward = null;
+			$scope.canvasStyle = null;
+			$scope.domAccessProvider = null;
+			$scope.footerStyle = null;
+			$scope.groupBy = null;
+			$scope.groupPanelStyle = null;
+			$scope.headerCellStyle = null;
+			$scope.headerScrollerDim = null;
+			$scope.headerScrollerStyle = null;
+			$scope.headerStyle = null;
+			$scope.maxPages = null;
+			$scope.maxRows = null;
+			$scope.multiSelect = null;
+			$scope.pageBackward = null;
+			$scope.pageForward = null;
+			$scope.pageToFirst = null;
+			$scope.pageToLast = null;
+			$scope.pagingOptions = null;
+			$scope.removeGroup = null;
+			$scope.rowStyle = null;
+			$scope.selectedItemCount = null;
+			$scope.selectionProvider= null;
+			$scope.showGroupPanel = null;
+			$scope.togglePin = null;
+			$scope.toggleSelectAll = null;
+			$scope.toggleShowMenu =null;
+			$scope.topPanelHeight = null;
+			$scope.topPanelStyle = null;
+			$scope.totalFilteredItemsLength = null;
+			$scope.totalRowWidth = null;
+			$scope.viewportDimHeight = null;
+			$scope.viewportStyle = null;
+			for (var c in $scope.columns) {
+				cleanupColumn($scope.columns[c]);
+			}
+			$scope.columns = null;
+			$scope.renderedColumns = null;
+
+			for (var r in $scope.renderedRows) {
+				cleanupRow($scope.renderedRows[r]);
+			}
+			$scope.renderedRows = null;
+			cleanupGrid(grid);
+
+		});
+	};
+
+	return cleanupService;
+}
+]);
 angular.module('ngGrid.services').factory('$domUtilityService',['$utilityService', '$window', function($utils, $window) {
     var domUtilityService = {};
     var regexCache = {};
@@ -1146,7 +1285,7 @@ var ngEventProvider = function (grid, $scope, domUtilityService, $timeout) {
         });
     };
     self.assignGridEventHandlers();
-    self.assignEvents();
+
 };
 
 var ngFooter = function ($scope, grid) {
@@ -2883,7 +3022,7 @@ ngGridDirectives.directive('ngGridMenu', ['$compile', '$templateCache', function
     };
     return ngGridMenu;
 }]);
-ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '$sortService', '$domUtilityService', '$utilityService', '$timeout', '$parse', '$http', '$q', function ($compile, $filter, $templateCache, sortService, domUtilityService, $utils, $timeout, $parse, $http, $q) {
+ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '$sortService', '$domUtilityService', '$utilityService', '$timeout', '$parse', '$http', '$q', '$cleanupService', function ($compile, $filter, $templateCache, sortService, domUtilityService, $utils, $timeout, $parse, $http, $q, cleanupService) {
     var ngGridDirective = {
         scope: true,
         compile: function() {
@@ -2953,6 +3092,7 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
                                     if (indx === undefined || indx === null) {
 										indx = j;
 									}
+
                                     if (grid.rowCache[indx]) {
                                         grid.rowCache[indx].ensureEntity(item);
                                     }
@@ -2984,6 +3124,9 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
                         iElement.append($compile($templateCache.get('gridTemplate.html'))($scope));
                         domUtilityService.AssignGridContainers($scope, iElement, grid);
                         grid.eventProvider = new ngEventProvider(grid, $scope, domUtilityService, $timeout);
+
+						cleanupService.decorateDirectiveForHeapCleanup($scope, $element, grid);
+
                         options.selectRow = function (rowIndex, state) {
                             if (grid.rowCache[rowIndex]) {
                                 if (grid.rowCache[rowIndex].clone) {

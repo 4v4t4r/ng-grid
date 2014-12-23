@@ -1,4 +1,4 @@
-﻿ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '$sortService', '$domUtilityService', '$utilityService', '$timeout', '$parse', '$http', '$q', function ($compile, $filter, $templateCache, sortService, domUtilityService, $utils, $timeout, $parse, $http, $q) {
+﻿ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '$sortService', '$domUtilityService', '$utilityService', '$timeout', '$parse', '$http', '$q', '$cleanupService', function ($compile, $filter, $templateCache, sortService, domUtilityService, $utils, $timeout, $parse, $http, $q, cleanupService) {
     var ngGridDirective = {
         scope: true,
         compile: function() {
@@ -126,7 +126,9 @@
                         //now use the manager to assign the event handlers
                         grid.eventProvider = new ngEventProvider(grid, $scope, domUtilityService, $timeout);
 
-                        // method for user to select a specific row programatically
+						cleanupService.decorateDirectiveForHeapCleanup($scope, $element, grid);
+
+						// method for user to select a specific row programatically
                         options.selectRow = function (rowIndex, state) {
                             if (grid.rowCache[rowIndex]) {
                                 if (grid.rowCache[rowIndex].clone) {
