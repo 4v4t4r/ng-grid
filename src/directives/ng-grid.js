@@ -88,12 +88,12 @@
 									var indx = grid.rowMap[j];
                                     if (indx === undefined || indx === null) {
 										indx = j;
+                                    	grid.rowMap[j] = j;
 									}
 
                                     if (grid.rowCache[indx]) {
                                         grid.rowCache[indx].ensureEntity(item);
                                     }
-                                    grid.rowMap[indx] = j;
                                 });
                                 grid.searchProvider.evalFilter();
                                 grid.configureColumnWidths();

@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 12/23/2014 15:23
+* Compiled At: 01/01/2015 09:33
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -3091,12 +3091,12 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
 									var indx = grid.rowMap[j];
                                     if (indx === undefined || indx === null) {
 										indx = j;
+                                    	grid.rowMap[j] = j;
 									}
 
                                     if (grid.rowCache[indx]) {
                                         grid.rowCache[indx].ensureEntity(item);
                                     }
-                                    grid.rowMap[indx] = j;
                                 });
                                 grid.searchProvider.evalFilter();
                                 grid.configureColumnWidths();
@@ -3126,7 +3126,6 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
                         grid.eventProvider = new ngEventProvider(grid, $scope, domUtilityService, $timeout);
 
 						cleanupService.decorateDirectiveForHeapCleanup($scope, $element, grid);
-
                         options.selectRow = function (rowIndex, state) {
                             if (grid.rowCache[rowIndex]) {
                                 if (grid.rowCache[rowIndex].clone) {
