@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 02/11/2015 12:32
+* Compiled At: 02/11/2015 17:54
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -258,7 +258,7 @@ angular.module('ngGrid.services').factory('$cleanupService', ['$timeout', functi
 
 	// Cleanup the row
 	function cleanupRow(row) {
-		if (row.clone !== undefined) {
+		if (row.clone) {
 			row.clone.orig = null;
 			cleanupRow(row.clone);
 		}
@@ -2195,10 +2195,16 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
         }
     };
 
+	self.itemsEqual = function(item1, item2) {
+		return (self.config.primaryKey && $scope.selectionProvider.pKeyParser(item1) !== undefined && $scope.selectionProvider.pKeyParser(item2) !== undefined) ?
+			$scope.selectionProvider.pKeyParser(item1) === $scope.selectionProvider.pKeyParser(item2) :
+			angular.equals(item1, item2);
+	};
+
 	self.findItemRowIndex = function(item) {
 		var foundRowIndex = -1;
 		angular.forEach(self.rowCache, function(row, rowIndex) {
-			if (row && row.entity && row.selectionProvider.pKeyParser(row.entity) === row.selectionProvider.pKeyParser(item)) {
+			if (row && row.entity && self.itemsEqual(row.entity, item)) {
 				foundRowIndex = rowIndex;
 			}
 		});
@@ -2208,7 +2214,7 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 	self.findItemRow = function(item) {
 		var foundRow = null;
 		angular.forEach(self.rowCache, function(row, rowIndex) {
-			if (row && row.entity && row.selectionProvider.pKeyParser(row.entity) === row.selectionProvider.pKeyParser(item)) {
+			if (row && row.entity && self.itemsEqual(row.entity, item)) {
 				foundRow = row;
 			}
 		});
