@@ -208,7 +208,6 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
         self.config.columnDefs = $scope.$eval(options.columnDefs);
     }
     self.rowCache = [];
-    self.rowMap = [];
     self.gridId = "ng" + $utils.newId();
     self.$root = null; //this is the root element that is passed in with the binding handler
     self.$groupPanel = null;
@@ -672,31 +671,36 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
             self.sortData(cols);
         }
     };
-    self.sortActual = function() {
+
+	self.findItemRowIndex = function(item) {
+		var foundRowIndex = -1;
+		angular.forEach(self.rowCache, function(row, rowIndex) {
+			if (row && row.entity && row.selectionProvider.pKeyParser(row.entity) === row.selectionProvider.pKeyParser(item)) {
+				foundRowIndex = rowIndex;
+			}
+		});
+		return foundRowIndex;
+	};
+
+	self.findItemRow = function(item) {
+		var foundRow = null;
+		angular.forEach(self.rowCache, function(row, rowIndex) {
+			if (row && row.entity && row.selectionProvider.pKeyParser(row.entity) === row.selectionProvider.pKeyParser(item)) {
+				foundRow = row;
+			}
+		});
+		return foundRow;
+	};
+
+	self.sortActual = function() {
         if (!self.config.useExternalSorting) {
             var tempData = self.data.slice(0);
-            angular.forEach(tempData, function(item, i) {
-                var e = self.rowMap[i];
-                if (e !== undefined) {
-                    var v = self.rowCache[e];
-                    if (v !== undefined) {
-                        item.preSortSelected = v.selected;
-                        item.preSortIndex = i;
-                    }
-                }
-            });
-            sortService.Sort(self.config.sortInfo, tempData);
-            angular.forEach(tempData, function(item, i) {
-                self.rowCache[i].entity = item;
-                self.rowCache[i].selected = item.preSortSelected;
-                self.rowMap[item.preSortIndex] = i;
-                delete item.preSortSelected;
-                delete item.preSortIndex;
-            });
+			sortService.Sort(self.config.sortInfo, tempData);
+			self.rowFactory.fixRowCache(tempData);
         }
     };
 
-    self.clearSortingData = function (col) {
+	self.clearSortingData = function (col) {
         if (!col) {
             angular.forEach(self.lastSortedColumns, function (c) {
                 c.sortDirection = "";

@@ -79,22 +79,6 @@
                                 // make a temporary copy of the data
                                 grid.data = $.extend([], a);
                                 grid.rowFactory.fixRowCache();
-                                angular.forEach(grid.data, function (item, j) {
-									// The indx of the current item according to rowMap.
-									// Notice that in 1st time, rowMap might be empty, in which case the actual index
-									// is taken. This is a fix to the 'indx = x || y' bug, since x can be evaluated
-									// to 0, which is a valid index, but will be considered as false, resulting in y
-									// being evaluated.
-									var indx = grid.rowMap[j];
-                                    if (indx === undefined || indx === null) {
-										indx = j;
-                                    	grid.rowMap[j] = j;
-									}
-
-                                    if (grid.rowCache[indx]) {
-                                        grid.rowCache[indx].ensureEntity(item);
-                                    }
-                                });
                                 grid.searchProvider.evalFilter();
                                 grid.configureColumnWidths();
                                 grid.refreshDomSizes();
@@ -139,7 +123,9 @@
                         };
                         // method for user to select the row by data item programatically
                         options.selectItem = function (itemIndex, state) {
-                            options.selectRow(grid.rowMap[itemIndex], state);
+							var item = grid.data[itemIndex];
+							var rowIndex = grid.findItemRowIndex(item);
+							options.selectRow(rowIndex, state);
                         };
                         // method for user to set the select all state.
                         options.selectAll = function (state) {

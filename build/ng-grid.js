@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 01/28/2015 18:32
+* Compiled At: 02/11/2015 12:32
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -1436,7 +1436,6 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
         self.config.columnDefs = $scope.$eval(options.columnDefs);
     }
     self.rowCache = [];
-    self.rowMap = [];
     self.gridId = "ng" + $utils.newId();
     self.$root = null; 
     self.$groupPanel = null;
@@ -1855,31 +1854,36 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
             self.sortData(cols);
         }
     };
-    self.sortActual = function() {
+
+	self.findItemRowIndex = function(item) {
+		var foundRowIndex = -1;
+		angular.forEach(self.rowCache, function(row, rowIndex) {
+			if (row && row.entity && row.selectionProvider.pKeyParser(row.entity) === row.selectionProvider.pKeyParser(item)) {
+				foundRowIndex = rowIndex;
+			}
+		});
+		return foundRowIndex;
+	};
+
+	self.findItemRow = function(item) {
+		var foundRow = null;
+		angular.forEach(self.rowCache, function(row, rowIndex) {
+			if (row && row.entity && row.selectionProvider.pKeyParser(row.entity) === row.selectionProvider.pKeyParser(item)) {
+				foundRow = row;
+			}
+		});
+		return foundRow;
+	};
+
+	self.sortActual = function() {
         if (!self.config.useExternalSorting) {
             var tempData = self.data.slice(0);
-            angular.forEach(tempData, function(item, i) {
-                var e = self.rowMap[i];
-                if (e !== undefined) {
-                    var v = self.rowCache[e];
-                    if (v !== undefined) {
-                        item.preSortSelected = v.selected;
-                        item.preSortIndex = i;
-                    }
-                }
-            });
-            sortService.Sort(self.config.sortInfo, tempData);
-            angular.forEach(tempData, function(item, i) {
-                self.rowCache[i].entity = item;
-                self.rowCache[i].selected = item.preSortSelected;
-                self.rowMap[item.preSortIndex] = i;
-                delete item.preSortSelected;
-                delete item.preSortIndex;
-            });
+			sortService.Sort(self.config.sortInfo, tempData);
+			self.rowFactory.fixRowCache(tempData);
         }
     };
 
-    self.clearSortingData = function (col) {
+	self.clearSortingData = function (col) {
         if (!col) {
             angular.forEach(self.lastSortedColumns, function (c) {
                 c.sortDirection = "";
@@ -2282,16 +2286,22 @@ var ngRowFactory = function (grid, $scope, domUtilityService, $templateCache, $u
         grid.setRenderedRows(rowArr);
     };
 
-    self.fixRowCache = function () {
-        var newLen = grid.data.length;
-        var diff = newLen - grid.rowCache.length;
-        if (diff < 0) {
-            grid.rowCache.length = grid.rowMap.length = newLen;
-        } else {
-            for (var i = grid.rowCache.length; i < newLen; i++) {
-                grid.rowCache[i] = grid.rowFactory.buildEntityRow(grid.data[i], i);
-            }
-        }
+    self.fixRowCache = function (data) {
+		if (!data) {
+			data = grid.data;
+		}
+
+		var newRowCache = [];
+
+		angular.forEach(data, function(item, itemIndex) {
+			var row = grid.findItemRow(item);
+			if (!row) {
+				row = grid.rowFactory.buildEntityRow(item, itemIndex);
+			}
+			newRowCache.push(row);
+		});
+
+		grid.rowCache = newRowCache;
     };
     self.parseGroupData = function(g) {
         if (g.values) {
@@ -3087,17 +3097,6 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
                             var dataWatcher = function (a) {
                                 grid.data = $.extend([], a);
                                 grid.rowFactory.fixRowCache();
-                                angular.forEach(grid.data, function (item, j) {
-									var indx = grid.rowMap[j];
-                                    if (indx === undefined || indx === null) {
-										indx = j;
-                                    	grid.rowMap[j] = j;
-									}
-
-                                    if (grid.rowCache[indx]) {
-                                        grid.rowCache[indx].ensureEntity(item);
-                                    }
-                                });
                                 grid.searchProvider.evalFilter();
                                 grid.configureColumnWidths();
                                 grid.refreshDomSizes();
@@ -3135,7 +3134,9 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
                             }
                         };
                         options.selectItem = function (itemIndex, state) {
-                            options.selectRow(grid.rowMap[itemIndex], state);
+							var item = grid.data[itemIndex];
+							var rowIndex = grid.findItemRowIndex(item);
+							options.selectRow(rowIndex, state);
                         };
                         options.selectAll = function (state) {
                             $scope.toggleSelectAll(state);
