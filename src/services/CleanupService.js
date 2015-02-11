@@ -50,7 +50,7 @@ angular.module('ngGrid.services').factory('$cleanupService', ['$timeout', functi
 
 	// Cleanup the row
 	function cleanupRow(row) {
-		if (row.clone !== undefined) {
+		if (row.clone) {
 			row.clone.orig = null;
 			cleanupRow(row.clone);
 		}
