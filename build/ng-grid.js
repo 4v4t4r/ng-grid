@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 02/11/2015 17:54
+* Compiled At: 02/15/2015 09:28
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -2303,6 +2303,8 @@ var ngRowFactory = function (grid, $scope, domUtilityService, $templateCache, $u
 			var row = grid.findItemRow(item);
 			if (!row) {
 				row = grid.rowFactory.buildEntityRow(item, itemIndex);
+			} else {
+				row.ensureEntity(item);
 			}
 			newRowCache.push(row);
 		});

@@ -119,6 +119,8 @@
 			var row = grid.findItemRow(item);
 			if (!row) {
 				row = grid.rowFactory.buildEntityRow(item, itemIndex);
+			} else {
+				row.ensureEntity(item);
 			}
 			newRowCache.push(row);
 		});
