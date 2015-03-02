@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 02/15/2015 09:28
+* Compiled At: 03/02/2015 17:08
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -743,14 +743,22 @@ angular.module('ngGrid.services').factory('$sortService', ['$parse', function($p
     };
     sortService.getSortFn = function(col, data) {
         var sortFn, item;
+
+		// Reset custom sort to be false. Later we'll set it up
+		sortService.isCustomSort = false;
+
         //see if we already figured out what to use to sort the column
         if (sortService.colSortFnCache[col.field]) {
-            sortFn = sortService.colSortFnCache[col.field];
+            sortFn = sortService.colSortFnCache[col.field].sortFn;
+			sortService.isCustomSort = sortService.colSortFnCache[col.field].isCustomSort;
         }
         else if (col.sortingAlgorithm !== undefined) {
             sortFn = col.sortingAlgorithm;
-            sortService.colSortFnCache[col.field] = col.sortingAlgorithm;
-            sortService.isCustomSort = true;
+			sortService.isCustomSort = true;
+            sortService.colSortFnCache[col.field] = {
+				sortFn: col.sortingAlgorithm,
+				isCustomSort: true
+			};
         }
         else { // try and guess what sort function to use
             item = data[0];
@@ -760,7 +768,10 @@ angular.module('ngGrid.services').factory('$sortService', ['$parse', function($p
             sortFn = sortService.guessSortFn($parse(col.field)(item));
             //cache it
             if (sortFn) {
-                sortService.colSortFnCache[col.field] = sortFn;
+                sortService.colSortFnCache[col.field] = {
+					sortFn: sortFn,
+					isCustomSort: false
+				};
             } else {
                 // we assign the alpha sort because anything that is null/undefined will never get passed to
                 // the actual sorting function. It will get caught in our null check and returned to be sorted

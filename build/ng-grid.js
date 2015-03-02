@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 02/15/2015 09:28
+* Compiled At: 03/02/2015 17:08
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -625,13 +625,18 @@ angular.module('ngGrid.services').factory('$sortService', ['$parse', function($p
     };
     sortService.getSortFn = function(col, data) {
         var sortFn, item;
+		sortService.isCustomSort = false;
         if (sortService.colSortFnCache[col.field]) {
-            sortFn = sortService.colSortFnCache[col.field];
+            sortFn = sortService.colSortFnCache[col.field].sortFn;
+			sortService.isCustomSort = sortService.colSortFnCache[col.field].isCustomSort;
         }
         else if (col.sortingAlgorithm !== undefined) {
             sortFn = col.sortingAlgorithm;
-            sortService.colSortFnCache[col.field] = col.sortingAlgorithm;
-            sortService.isCustomSort = true;
+			sortService.isCustomSort = true;
+            sortService.colSortFnCache[col.field] = {
+				sortFn: col.sortingAlgorithm,
+				isCustomSort: true
+			};
         }
         else { 
             item = data[0];
@@ -640,7 +645,10 @@ angular.module('ngGrid.services').factory('$sortService', ['$parse', function($p
             }
             sortFn = sortService.guessSortFn($parse(col.field)(item));
             if (sortFn) {
-                sortService.colSortFnCache[col.field] = sortFn;
+                sortService.colSortFnCache[col.field] = {
+					sortFn: sortFn,
+					isCustomSort: false
+				};
             } else {
                 sortFn = sortService.sortAlpha;
             }
