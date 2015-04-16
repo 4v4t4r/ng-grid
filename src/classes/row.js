@@ -10,6 +10,20 @@ var ngRow = function (entity, config, selectionProvider, rowIndex, $utils) {
 	this.afterSelectionChange = config.afterSelectionChangeCallback;
 	this.offsetTop = this.rowIndex * config.rowHeight;
 	this.rowDisplayIndex = 0;
+
+    var self = this;
+    var orig;
+    Object.defineProperty(this, 'orig', {
+      get: function() {
+        return orig;
+      },
+      set: function(value) {
+        if (orig && orig.clone === self && orig !== value) {
+          orig.clone = null;
+        }
+        orig = value;
+      }
+    });
 };
 
 ngRow.prototype.setSelection = function (isSelected) {

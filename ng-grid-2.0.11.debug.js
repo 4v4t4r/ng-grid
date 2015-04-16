@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 03/02/2015 17:08
+* Compiled At: 04/16/2015 07:39
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -2490,6 +2490,20 @@ var ngRow = function (entity, config, selectionProvider, rowIndex, $utils) {
 	this.afterSelectionChange = config.afterSelectionChangeCallback;
 	this.offsetTop = this.rowIndex * config.rowHeight;
 	this.rowDisplayIndex = 0;
+
+    var self = this;
+    var orig;
+    Object.defineProperty(this, 'orig', {
+      get: function() {
+        return orig;
+      },
+      set: function(value) {
+        if (orig && orig.clone === self && orig !== value) {
+          orig.clone = null;
+        }
+        orig = value;
+      }
+    });
 };
 
 ngRow.prototype.setSelection = function (isSelected) {
@@ -2552,6 +2566,7 @@ ngRow.prototype.setVars = function (fromRow) {
 	this.selected = fromRow.selected;
     this.orig = fromRow;
 };
+
 var ngRowFactory = function (grid, $scope, domUtilityService, $templateCache, $utils) {
     var self = this;
     // we cache rows when they are built, and then blow the cache away when sorting
