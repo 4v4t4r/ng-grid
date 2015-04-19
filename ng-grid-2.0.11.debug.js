@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 04/16/2015 07:39
+* Compiled At: 04/19/2015 08:38
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -259,8 +259,8 @@ angular.module('ngGrid.services').factory('$cleanupService', ['$timeout', functi
 	// Cleanup the row
 	function cleanupRow(row) {
 		if (row.clone) {
-			row.clone.orig = null;
 			cleanupRow(row.clone);
+			row.clone.orig = null;
 		}
 		//row.col = null;
 		cleanupObject(row);
@@ -424,6 +424,7 @@ angular.module('ngGrid.services').factory('$cleanupService', ['$timeout', functi
 	return cleanupService;
 }
 ]);
+
 angular.module('ngGrid.services').factory('$domUtilityService',['$utilityService', '$window', function($utils, $window) {
     var domUtilityService = {};
     var regexCache = {};
