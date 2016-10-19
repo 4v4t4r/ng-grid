@@ -3139,7 +3139,11 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
                                 $scope.$emit("ngGridEventData", grid.gridId);
                             };
                             $scope.$on('$destroy', $scope.$parent.$watch(options.data, dataWatcher));
-                            $scope.$on('$destroy', $scope.$parent.$watch(options.data + '.length', function() {
+                            $scope.$on('$destroy', $scope.$parent.$watch(options.data + '.length', function(oldVal, newVal) {
+								
+								console.log('data.length oldVal: ' + oldVal);
+								console.log('data.length newVal: ' + newVal);
+								
                                 dataWatcher($scope.$eval(options.data));
 								$scope.adjustScrollTop(grid.$viewport.scrollTop(), true);
                             }));
