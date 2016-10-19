@@ -126,6 +126,9 @@
 		});
 
 		grid.rowCache = newRowCache;
+        if (grid.config.primaryKey) {
+            grid.rowCacheIndex = _.keyBy(grid.rowCache, 'entity.' + grid.config.primaryKey);
+        }
     };
 
     //magical recursion. it works. I swear it. I figured it out in the shower one day.

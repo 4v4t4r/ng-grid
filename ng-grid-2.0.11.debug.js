@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 04/19/2015 08:38
+* Compiled At: 10/19/2016 18:30
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -2215,6 +2215,9 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 
 	self.findItemRowIndex = function(item) {
 		var foundRowIndex = -1;
+		
+		// TODO: this can be improved using the self.rowCacheIndex as well
+		// we just need to persist the item's index into the cache
 		angular.forEach(self.rowCache, function(row, rowIndex) {
 			if (row && row.entity && self.itemsEqual(row.entity, item)) {
 				foundRowIndex = rowIndex;
@@ -2225,11 +2228,17 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 
 	self.findItemRow = function(item) {
 		var foundRow = null;
-		angular.forEach(self.rowCache, function(row, rowIndex) {
-			if (row && row.entity && self.itemsEqual(row.entity, item)) {
-				foundRow = row;
-			}
-		});
+        
+        if (self.config.primaryKey && self.rowCacheIndex) {
+            foundRow  = self.rowCacheIndex[item[self.config.primaryKey]];
+        } else {
+			angular.forEach(self.rowCache, function(row, rowIndex) {
+				if (row && row.entity && self.itemsEqual(row.entity, item)) {
+					foundRow = row;
+				}
+			});    
+        }
+		
 		return foundRow;
 	};
 
@@ -2696,6 +2705,9 @@ var ngRowFactory = function (grid, $scope, domUtilityService, $templateCache, $u
 		});
 
 		grid.rowCache = newRowCache;
+        if (grid.config.primaryKey) {
+            grid.rowCacheIndex = _.keyBy(grid.rowCache, 'entity.' + grid.config.primaryKey);
+        }
     };
 
     //magical recursion. it works. I swear it. I figured it out in the shower one day.

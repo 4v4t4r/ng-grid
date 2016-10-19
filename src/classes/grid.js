@@ -680,6 +680,9 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 
 	self.findItemRowIndex = function(item) {
 		var foundRowIndex = -1;
+		
+		// TODO: this can be improved using the self.rowCacheIndex as well
+		// we just need to persist the item's index into the cache
 		angular.forEach(self.rowCache, function(row, rowIndex) {
 			if (row && row.entity && self.itemsEqual(row.entity, item)) {
 				foundRowIndex = rowIndex;
@@ -690,11 +693,17 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 
 	self.findItemRow = function(item) {
 		var foundRow = null;
-		angular.forEach(self.rowCache, function(row, rowIndex) {
-			if (row && row.entity && self.itemsEqual(row.entity, item)) {
-				foundRow = row;
-			}
-		});
+        
+        if (self.config.primaryKey && self.rowCacheIndex) {
+            foundRow  = self.rowCacheIndex[item[self.config.primaryKey]];
+        } else {
+			angular.forEach(self.rowCache, function(row, rowIndex) {
+				if (row && row.entity && self.itemsEqual(row.entity, item)) {
+					foundRow = row;
+				}
+			});    
+        }
+		
 		return foundRow;
 	};
 

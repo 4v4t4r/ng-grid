@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 04/19/2015 08:38
+* Compiled At: 10/19/2016 18:30
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -1882,11 +1882,16 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 
 	self.findItemRow = function(item) {
 		var foundRow = null;
-		angular.forEach(self.rowCache, function(row, rowIndex) {
-			if (row && row.entity && self.itemsEqual(row.entity, item)) {
-				foundRow = row;
-			}
-		});
+        if (self.config.primaryKey && self.rowCacheIndex) {
+            foundRow  = self.rowCacheIndex[item[self.config.primaryKey]];
+        } else {
+			angular.forEach(self.rowCache, function(row, rowIndex) {
+				if (row && row.entity && self.itemsEqual(row.entity, item)) {
+					foundRow = row;
+				}
+			});
+        }
+		
 		return foundRow;
 	};
 
@@ -2334,6 +2339,9 @@ var ngRowFactory = function (grid, $scope, domUtilityService, $templateCache, $u
 		});
 
 		grid.rowCache = newRowCache;
+        if (grid.config.primaryKey) {
+            grid.rowCacheIndex = _.keyBy(grid.rowCache, 'entity.' + grid.config.primaryKey);
+        }
     };
     self.parseGroupData = function(g) {
         if (g.values) {
@@ -3139,11 +3147,7 @@ ngGridDirectives.directive('ngGrid', ['$compile', '$filter', '$templateCache', '
                                 $scope.$emit("ngGridEventData", grid.gridId);
                             };
                             $scope.$on('$destroy', $scope.$parent.$watch(options.data, dataWatcher));
-                            $scope.$on('$destroy', $scope.$parent.$watch(options.data + '.length', function(oldVal, newVal) {
-								
-								console.log('data.length oldVal: ' + oldVal);
-								console.log('data.length newVal: ' + newVal);
-								
+                            $scope.$on('$destroy', $scope.$parent.$watch(options.data + '.length', function() {
                                 dataWatcher($scope.$eval(options.data));
 								$scope.adjustScrollTop(grid.$viewport.scrollTop(), true);
                             }));
