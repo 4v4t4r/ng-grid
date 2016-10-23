@@ -190,8 +190,12 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
         //the threshold in rows to force virtualization on
         virtualizationThreshold: 50,
 
-	// Don't handle tabs, so they can be used to navigate between controls.
-	noTabInterference: false
+		// Don't handle tabs, so they can be used to navigate between controls.
+		noTabInterference: false,
+
+		// Use internal indexo of the row cache, according to the primaryKey of entities, to improve grid performance.
+		// (if no primaryKey supplied, this option will be ignored).
+		useRowCacheIndex: false
     },
         self = this;
     self.maxCanvasHt = 0;
@@ -694,7 +698,7 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 	self.findItemRow = function(item) {
 		var foundRow = null;
         
-        if (self.config.primaryKey && self.rowCacheIndex) {
+        if (self.rowCacheIndex) {
             foundRow  = self.rowCacheIndex[item[self.config.primaryKey]];
         } else {
 			angular.forEach(self.rowCache, function(row, rowIndex) {

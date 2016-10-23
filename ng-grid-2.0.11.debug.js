@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 10/19/2016 18:30
+* Compiled At: 10/23/2016 10:57
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -1725,8 +1725,12 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
         //the threshold in rows to force virtualization on
         virtualizationThreshold: 50,
 
-	// Don't handle tabs, so they can be used to navigate between controls.
-	noTabInterference: false
+		// Don't handle tabs, so they can be used to navigate between controls.
+		noTabInterference: false,
+
+		// Use internal indexo of the row cache, according to the primaryKey of entities, to improve grid performance.
+		// (if no primaryKey supplied, this option will be ignored).
+		useRowCacheIndex: false
     },
         self = this;
     self.maxCanvasHt = 0;
@@ -2229,7 +2233,7 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 	self.findItemRow = function(item) {
 		var foundRow = null;
         
-        if (self.config.primaryKey && self.rowCacheIndex) {
+        if (self.rowCacheIndex) {
             foundRow  = self.rowCacheIndex[item[self.config.primaryKey]];
         } else {
 			angular.forEach(self.rowCache, function(row, rowIndex) {
@@ -2705,9 +2709,11 @@ var ngRowFactory = function (grid, $scope, domUtilityService, $templateCache, $u
 		});
 
 		grid.rowCache = newRowCache;
-        if (grid.config.primaryKey) {
+        if (grid.config.useRowCacheIndex && grid.config.primaryKey) {
             grid.rowCacheIndex = _.keyBy(grid.rowCache, 'entity.' + grid.config.primaryKey);
-        }
+        } else {
+			grid.rowCacheIndex = null;	
+		}
     };
 
     //magical recursion. it works. I swear it. I figured it out in the shower one day.
