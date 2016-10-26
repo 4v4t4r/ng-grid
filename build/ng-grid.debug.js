@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 10/23/2016 10:57
+* Compiled At: 10/26/2016 18:34
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -2233,7 +2233,7 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 	self.findItemRow = function(item) {
 		var foundRow = null;
         
-        if (self.rowCacheIndex) {
+        if (self.rowCacheIndex && item.hasOwnProperty(self.config.primaryKey)) {
             foundRow  = self.rowCacheIndex[item[self.config.primaryKey]];
         } else {
 			angular.forEach(self.rowCache, function(row, rowIndex) {
