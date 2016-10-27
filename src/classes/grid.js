@@ -698,8 +698,8 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 	self.findItemRow = function(item) {
 		var foundRow = null;
         
-        if (self.rowCacheIndex && item.hasOwnProperty(self.config.primaryKey)) {
-            foundRow  = self.rowCacheIndex[item[self.config.primaryKey]];
+        if (self.rowCacheIndex && $scope.selectionProvider.pKeyParser(item) !== undefined) {
+            foundRow  = self.rowCacheIndex[$scope.selectionProvider.pKeyParser(item)];
         } else {
 			angular.forEach(self.rowCache, function(row, rowIndex) {
 				if (row && row.entity && self.itemsEqual(row.entity, item)) {
