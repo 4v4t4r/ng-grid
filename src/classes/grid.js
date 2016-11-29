@@ -193,9 +193,9 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 		// Don't handle tabs, so they can be used to navigate between controls.
 		noTabInterference: false,
 
-		// Use internal indexo of the row cache, according to the primaryKey of entities, to improve grid performance.
+		// Use internal index of the row cache, according to the primaryKey of entities, to improve grid performance.
 		// (if no primaryKey supplied, this option will be ignored).
-		useRowCacheIndex: false
+		useRowCacheIndex: true
     },
         self = this;
     self.maxCanvasHt = 0;

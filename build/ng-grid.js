@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 10/27/2016 19:00
+* Compiled At: 11/29/2016 18:29
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -1430,7 +1430,7 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
         i18n: 'en',
         virtualizationThreshold: 50,
 		noTabInterference: false,
-		useRowCacheIndex: false
+		useRowCacheIndex: true
     },
         self = this;
     self.maxCanvasHt = 0;

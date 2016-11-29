@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 10/27/2016 19:00
+* Compiled At: 11/29/2016 18:29
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -1728,9 +1728,9 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
 		// Don't handle tabs, so they can be used to navigate between controls.
 		noTabInterference: false,
 
-		// Use internal indexo of the row cache, according to the primaryKey of entities, to improve grid performance.
+		// Use internal index of the row cache, according to the primaryKey of entities, to improve grid performance.
 		// (if no primaryKey supplied, this option will be ignored).
-		useRowCacheIndex: false
+		useRowCacheIndex: true
     },
         self = this;
     self.maxCanvasHt = 0;
