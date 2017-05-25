@@ -2,7 +2,7 @@
 * ng-grid JavaScript Library
 * Authors: https://github.com/angular-ui/ng-grid/blob/master/README.md 
 * License: MIT (http://www.opensource.org/licenses/mit-license.php)
-* Compiled At: 11/29/2016 18:29
+* Compiled At: 05/25/2017 15:28
 ***********************************************/
 (function(window, $) {
 'use strict';
@@ -1476,11 +1476,11 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
             $http.get(t, {
                 cache: $templateCache
             })
-            .success(function(data){
-                $templateCache.put(uKey, data);
+            .then(function(response){
+                $templateCache.put(uKey, response.data);
                 p.resolve();
-            })
-            .error(function(err){
+            },
+            function(err){
                 p.reject("Could not load template: " + t);
             });
         } else if (t) {

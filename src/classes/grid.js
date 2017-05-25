@@ -247,11 +247,11 @@ var ngGrid = function ($scope, options, sortService, domUtilityService, $filter,
             $http.get(t, {
                 cache: $templateCache
             })
-            .success(function(data){
-                $templateCache.put(uKey, data);
+            .then(function(response){
+                $templateCache.put(uKey, response.data);
                 p.resolve();
-            })
-            .error(function(err){
+            },
+            function(err){
                 p.reject("Could not load template: " + t);
             });
         } else if (t) {
